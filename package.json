@@ -1,6 +1,6 @@
 {
   "name": "Treecraft",
-  "displayName": "TreeCraft",
+  "displayName": "Treecraft - File Structure Generator",
   "description": "Generate nested folders and files based on a simple text input.",
   "version": "0.0.1",
   "engines": {
@@ -9,13 +9,13 @@
   "categories": [
     "Other"
   ],
-  "activationEvents": [],
+  
   "main": "./out/extension.js",
   "contributes": {
     "commands": [
       {
-        "command": "extension.createFileTree",
-        "title": "Create File Tree from Text"
+         "command": "treecraft.createFileTree",
+         "title": "Treecraft: Create File Tree from Text"
       }
     ]
   },
