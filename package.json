@@ -1,5 +1,5 @@
 {
-  "name": "Treecraft",
+  "name": "treecraft",
   "displayName": "Treecraft - File Structure Generator",
   "description": "Generate nested folders and files based on a simple text input.",
   "version": "0.0.1",
