@@ -7,6 +7,15 @@ function wait(ms: number) {
     return new Promise(resolve => setTimeout(resolve, ms));
 }
 
+// Fonction pour remplacer chaque symbole └, │, ─, et ├ par un espace
+function preprocessStructure(lines: string[]): string[] {
+    return lines.map(line => {
+        // Remplacer chaque occurrence de └, │, ─, et ├ par un espace unique
+        let newLine = line.replace(/└|─|│|├/g, ' '); // Remplacer chaque symbole par un espace
+        return newLine;
+    });
+}
+
 export function activate(context: vscode.ExtensionContext) {
     let disposable = vscode.commands.registerCommand('treecraft.createFileTree', async () => {
         // Ouvrir le fichier contenant l'arborescence
@@ -26,9 +35,22 @@ export function activate(context: vscode.ExtensionContext) {
 
         const filePath = fileUri[0].fsPath;
         const fileContent = fs.readFileSync(filePath, 'utf-8');
-        const lines = fileContent.split('\n');
+        let lines = fileContent.split('\n');
 
-        // Demander à l'utilisateur de choisir le dossier cible
+        // Étape de prétraitement pour remplacer les symboles par des espaces
+        lines = preprocessStructure(lines);
+        
+
+        // Vérifier le premier élément sans indentation (racine si aucun autre élément au même niveau)
+        const rootFolderName = lines[0].trim();
+        lines.shift(); // Supprimer le dossier racine de la liste pour traiter le reste
+        let hasIndentation = lines.some(line => line.search(/\S/) > 0); // Vérifier s'il y a des indentations
+
+        // Écrire le fichier converti pour vérifier la structure nettoyée
+        const convertedFilePath = path.join(path.dirname(filePath), 'structure_converted_with_spaces.txt');
+        fs.writeFileSync(convertedFilePath, lines.join('\n'));
+
+        // Demander à l'utilisateur de choisir le dossier où le dossier racine sera créé
         const folderUri = await vscode.window.showOpenDialog({
             canSelectFiles: false,
             canSelectFolders: true,
@@ -40,12 +62,19 @@ export function activate(context: vscode.ExtensionContext) {
             return;
         }
 
-        const targetFolder = folderUri[0].fsPath;
+        // Si aucun fichier n'est à la même indentation que la racine, traiter comme parent unique
+        const rootFolder = path.join(folderUri[0].fsPath, rootFolderName);
+
+        // Créer le dossier racine s'il n'existe pas encore
+        if (!fs.existsSync(rootFolder)) {
+            fs.mkdirSync(rootFolder, { recursive: true });
+        }
 
         // Pile pour suivre les dossiers parents en fonction de l'indentation
-        let stack: string[] = [targetFolder];
+        let stack: string[] = [rootFolder];
         let previousIndentation = 0;
 
+        // Boucle sur les lignes pour traiter les dossiers et fichiers
         for (const line of lines) {
             const trimmedLine = line.trim();
 
@@ -54,7 +83,7 @@ export function activate(context: vscode.ExtensionContext) {
                 continue;
             }
 
-            // Calculer l'indentation (nombre d'espaces ou tabulations avant le texte)
+            // Calculer l'indentation actuelle
             const currentIndentation = line.search(/\S/);
 
             // Si l'indentation est inférieure ou égale à la précédente, ajuster la pile
@@ -88,11 +117,10 @@ export function activate(context: vscode.ExtensionContext) {
             await wait(100); // Attendre 100ms avant de continuer (facultatif)
         }
 
-        vscode.window.showInformationMessage('Structure de fichier créée avec succès !');
+        vscode.window.showInformationMessage(`Structure de fichier créée avec succès dans ${rootFolderName} !`);
     });
 
     context.subscriptions.push(disposable);
 }
 
 export function deactivate() {}
-

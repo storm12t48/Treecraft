@@ -46,27 +46,30 @@
 ### Input Text File
 
 ```
-/MyProject
-├─── src
-│    ├─── app.js
-│    └─── styles
-│         └─── style.css
-├─── README.md
-├─── .gitignore
-└─── package.json
+MyMicroserviceApp
+    Controllers
+        ProductsController.cs
+    Models
+        Product.cs
+    Data
+        ProductDbContext.cs
+    appsettings.json
+    Program.cs
 ```
 
 ### Output
 
 ```
-/MyProject
-├─── src
-│    ├─── app.js
-│    └─── styles
-│         └─── style.css
-├─── README.md
-├─── .gitignore
-└─── package.json
+MyMicroserviceApp
+├─── Controllers
+│    └── ProductsController.cs
+├─── Models
+│    └── Product.cs
+├─── Data
+│    └── ProductDbContext.cs
+├─── appsettings.json
+├─── Program.cs
+└─── Startup.cs
 ```
 
 ## Installation
