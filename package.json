@@ -15,7 +15,7 @@
     "commands": [
       {
         "command": "extension.createFileTree",
-        "title": "Create File Tree from File Text"
+        "title": "Create File Tree from Text"
       }
     ]
   },
