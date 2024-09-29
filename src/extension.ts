@@ -35,35 +35,39 @@ export function activate(context: vscode.ExtensionContext) {
             return;
         }
 
+        // The target folder is where everything will be created
         const targetFolder = folderUri[0].fsPath;
 
         // Regex to identify file extensions
         const fileExtensionRegex = /\.[a-zA-Z0-9]+$/;
 
-        // Parse the file content and create folders/files
-        const stack: string[] = [];
-        lines.forEach(line => {
+        // Stack to maintain the current directory hierarchy
+        const stack: string[] = [targetFolder];
+
+        // Start processing the file content
+        lines.forEach((line, index) => {
             const trimmedLine = line.trim();
+
+            // Ignore the first line if it starts with '/'
+            if (index === 0 && trimmedLine.startsWith('/')) {
+                return; // Skip the root folder name
+            }
+
             if (!trimmedLine || trimmedLine.startsWith('#') || trimmedLine === '│') {
-                return; // Skip empty lines, comments, and formatting lines
+                return; // Skip comments, empty lines, and formatting lines
             }
 
-            const depth = line.search(/\S/);
-
-            // Adjust stack based on indentation level
-            while (stack.length > depth) {
-                stack.pop();
-            }
-
+            const depth = (line.match(/│|├|└/g) || []).length; // Calculate depth based on '│', '├', and '└'
+            
             const relativePath = trimmedLine.replace(/^[├─└│]+/g, '').trim();
-            const fullPath = path.join(targetFolder, ...stack, relativePath);
+            const fullPath = path.join(...stack.slice(0, depth), relativePath.replace(/\/$/, ''));
 
             // Check if it's a file or a directory
             if (!fileExtensionRegex.test(relativePath)) {
                 // Create directory (no extension)
                 if (!fs.existsSync(fullPath)) {
                     fs.mkdirSync(fullPath, { recursive: true });
-                    stack.push(relativePath); // Add to stack as a directory
+                    stack[depth] = fullPath; // Add to stack as a directory
                 }
             } else {
                 // Create file (has extension)
