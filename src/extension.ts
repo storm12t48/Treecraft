@@ -1,26 +1,77 @@
-// The module 'vscode' contains the VS Code extensibility API
-// Import the module and reference it with the alias vscode in your code below
 import * as vscode from 'vscode';
+import * as fs from 'fs';
+import * as path from 'path';
 
-// This method is called when your extension is activated
-// Your extension is activated the very first time the command is executed
 export function activate(context: vscode.ExtensionContext) {
+    let disposable = vscode.commands.registerCommand('extension.createFileTree', async () => {
+        const fileUri = await vscode.window.showOpenDialog({
+            canSelectFiles: true,
+            canSelectFolders: false,
+            canSelectMany: false,
+            filters: {
+                'Text files': ['txt']
+            }
+        });
 
-	// Use the console to output diagnostic information (console.log) and errors (console.error)
-	// This line of code will only be executed once when your extension is activated
-	console.log('Congratulations, your extension "Treecraft" is now active!');
+        if (!fileUri || fileUri.length === 0) {
+            return;
+        }
 
-	// The command has been defined in the package.json file
-	// Now provide the implementation of the command with registerCommand
-	// The commandId parameter must match the command field in package.json
-	const disposable = vscode.commands.registerCommand('Treecraft.helloWorld', () => {
-		// The code you place here will be executed every time your command is executed
-		// Display a message box to the user
-		vscode.window.showInformationMessage('Hello World from TreeCraft!');
-	});
+        const filePath = fileUri[0].fsPath;
+        const fileContent = fs.readFileSync(filePath, 'utf-8');
+        const lines = fileContent.split('\n');
 
-	context.subscriptions.push(disposable);
+        const folderUri = await vscode.window.showOpenDialog({
+            canSelectFiles: false,
+            canSelectFolders: true,
+            canSelectMany: false
+        });
+
+        if (!folderUri || folderUri.length === 0) {
+            return;
+        }
+
+        const targetFolder = folderUri[0].fsPath;
+
+        // Parse the file structure and create directories and files
+        const stack: string[] = [];
+        lines.forEach(line => {
+            const trimmedLine = line.trim();
+            if (!trimmedLine || trimmedLine.startsWith('#') || trimmedLine === '│') {
+                return; // Skip empty lines, comments, and formatting lines
+            }
+
+            // Calculate the depth of the current line based on leading spaces
+            const depth = line.search(/\S/);
+
+            // Update the current directory level based on indentation
+            while (stack.length > depth) {
+                stack.pop();
+            }
+
+            const relativePath = trimmedLine.replace(/^[├─└│]+/g, '').trim();
+            const fullPath = path.join(targetFolder, ...stack, relativePath.replace(/\/$/, ''));
+
+            if (relativePath.endsWith('/')) {
+                // Create a directory
+                if (!fs.existsSync(fullPath)) {
+                    fs.mkdirSync(fullPath, { recursive: true });
+                    stack.push(relativePath.replace('/', '')); // Push the folder into the stack
+                }
+            } else {
+                // Create a file
+                const dir = path.dirname(fullPath);
+                if (!fs.existsSync(dir)) {
+                    fs.mkdirSync(dir, { recursive: true });
+                }
+                fs.writeFileSync(fullPath, ''); // Create an empty file
+            }
+        });
+
+        vscode.window.showInformationMessage('File structure created successfully!');
+    });
+
+    context.subscriptions.push(disposable);
 }
 
-// This method is called when your extension is deactivated
 export function deactivate() {}

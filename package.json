@@ -14,8 +14,8 @@
   "contributes": {
     "commands": [
       {
-        "command": "Treecraft.helloWorld",
-        "title": "Hello World"
+        "command": "extension.createFileTree",
+        "title": "Create File Tree from File Text"
       }
     ]
   },
