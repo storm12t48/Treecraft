@@ -21,9 +21,11 @@ function preprocessStructure(lines: string[]): string[] {
 // Fonction pour vérifier si c'est un fichier ou un dossier en fonction des critères
 function isFile(line: string): boolean {
     const trimmedLine = line.trim();
+    // Liste des fichiers spécifiques sans extension à considérer comme des fichiers
+    const specialFiles = ['Dockerfile', 'Makefile', 'LICENSE', 'README', 'Gemfile', 'Capfile', 'Procfile', 'Rakefile', 'Vagrantfile'];
 
-    // Si le nom est "Dockerfile", c'est toujours un fichier
-    if (trimmedLine === 'Dockerfile') {
+    // Si le nom correspond à un fichier sans extension spécifique, c'est un fichier
+    if (specialFiles.includes(trimmedLine)) {
         return true;
     }
 
