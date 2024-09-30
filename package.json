@@ -2,7 +2,7 @@
   "name": "treecraft",
   "displayName": "Treecraft - File Structure Generator",
   "description": "Generate nested folders and files based on a simple text input.",
-  "version": "0.0.1",
+  "version": "1.0.0",
   "engines": {
     "vscode": "^1.93.0"
   },
@@ -42,4 +42,10 @@
     "yeoman-environment": "^4.4.1",
     "yeoman-generator": "^7.3.2"
   }
+  ,
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/storm12t48/Treecraft.git"
+}
+
 }

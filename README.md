@@ -97,3 +97,7 @@ code --install-extension your-publisher-name.treecraft
 
 Feel free to open issues or contribute by submitting pull requests. We welcome improvements to make Treecraft even better!
 
+## License
+
+MIT License
+
