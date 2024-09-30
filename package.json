@@ -1,8 +1,9 @@
 {
   "name": "treecraft",
-  "displayName": "Treecraft - File Structure Generator",
+  "displayName": "TreeCraft",
   "description": "Generate nested folders and files based on a simple text input.",
   "version": "1.0.0",
+  "publisher": "Treecraft",  
   "engines": {
     "vscode": "^1.93.0"
   },
@@ -10,6 +11,9 @@
     "Other"
   ],
   "main": "./out/extension.js",
+  "activationEvents": [
+    "onCommand:treecraft.createFileTree"
+  ],
   "contributes": {
     "commands": [
       {
@@ -20,12 +24,11 @@
     ]
   },
   "scripts": {
-    "vscode:prepublish": "npm run compile",
+    "vscode:prepublish": "webpack --mode production",
     "compile": "tsc -p ./",
     "watch": "tsc -watch -p ./",
-    "pretest": "npm run compile && npm run lint",
-    "lint": "eslint src",
-    "test": "vscode-test"
+    "package": "webpack --mode production",
+    "publish": "webpack --mode production && vsce publish"
   },
   "devDependencies": {
     "@types/mocha": "^10.0.7",
@@ -36,16 +39,18 @@
     "@vscode/test-cli": "^0.0.10",
     "@vscode/test-electron": "^2.4.1",
     "eslint": "^9.9.1",
-    "typescript": "^5.5.4"
+    "ts-loader": "^9.5.1",
+    "typescript": "^5.6.2",
+    "webpack": "^5.95.0",
+    "webpack-cli": "^5.1.4",
+    "webpack-node-externals": "^3.0.0"
   },
   "dependencies": {
     "yeoman-environment": "^4.4.1",
     "yeoman-generator": "^7.3.2"
-  }
-  ,
+  },
   "repository": {
     "type": "git",
     "url": "https://github.com/storm12t48/Treecraft.git"
-}
-
+  }
 }

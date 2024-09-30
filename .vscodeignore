@@ -1,11 +1,9 @@
+node_modules/**
 .vscode/**
-.vscode-test/**
-src/**
-.gitignore
-.yarnrc
-vsc-extension-quickstart.md
-**/tsconfig.json
-**/eslint.config.mjs
-**/*.map
-**/*.ts
-**/.vscode-test.*
+.git/**
+src/**           # Exclure les fichiers source TypeScript
+out/test/**      # Exclure les fichiers de test
+**/*.map         # Exclure les fichiers sourcemaps
+.vscodeignore
+webpack.config.js
+tsconfig.json
