@@ -7,13 +7,43 @@ function wait(ms: number) {
     return new Promise(resolve => setTimeout(resolve, ms));
 }
 
-// Fonction pour remplacer chaque symbole └, │, ─, et ├ par un espace
+// Fonction pour remplacer chaque symbole └, │, ─, et ├ par un espace et supprimer les "/"
 function preprocessStructure(lines: string[]): string[] {
-    return lines.map(line => {
-        // Remplacer chaque occurrence de └, │, ─, et ├ par un espace unique
-        let newLine = line.replace(/└|─|│|├/g, ' '); // Remplacer chaque symbole par un espace
-        return newLine;
-    });
+    return lines
+        .filter(line => !line.includes(']') && !line.includes('(ignored)'))  // Ignorer les lignes avec "]" ou "(ignored)"
+        .map(line => {
+            // Remplacer chaque occurrence de └, │, ─, et ├ par un espace unique, puis supprimer "/"
+            let newLine = line.replace(/└|─|│|├/g, ' ').replace(/\//g, ''); // Supprimer les "/"
+            return newLine;
+        });
+}
+
+// Fonction pour vérifier si c'est un fichier ou un dossier en fonction des critères
+function isFile(line: string): boolean {
+    const trimmedLine = line.trim();
+
+    // Si le nom est "Dockerfile", c'est toujours un fichier
+    if (trimmedLine === 'Dockerfile') {
+        return true;
+    }
+
+    // Si le nom contient "ignore", c'est un fichier
+    if (trimmedLine.includes('ignore')) {
+        return true;
+    }
+
+    // Si le nom se termine par "/", c'est un dossier
+    if (trimmedLine.endsWith('/')) {
+        return false;
+    }
+
+    // Si le nom a une extension (ex. .mjs, .js, .txt), c'est un fichier
+    if (path.extname(trimmedLine)) {
+        return true;
+    }
+
+    // Par défaut, si aucune condition n'est remplie, c'est un dossier
+    return false;
 }
 
 export function activate(context: vscode.ExtensionContext) {
@@ -37,20 +67,19 @@ export function activate(context: vscode.ExtensionContext) {
         const fileContent = fs.readFileSync(filePath, 'utf-8');
         let lines = fileContent.split('\n');
 
-        // Étape de prétraitement pour remplacer les symboles par des espaces
+        // Étape de prétraitement pour remplacer les symboles par des espaces et supprimer les "/"
         lines = preprocessStructure(lines);
-        
 
         // Vérifier le premier élément sans indentation (racine si aucun autre élément au même niveau)
-        const rootFolderName = lines[0].trim();
+        const rootFolderName = lines[0].trim(); // Assurez-vous que c'est uniquement un nom de dossier
+        vscode.window.showInformationMessage(`Nom du dossier racine : ${rootFolderName}`); // Debug: Afficher le nom du dossier racine
         lines.shift(); // Supprimer le dossier racine de la liste pour traiter le reste
-        let hasIndentation = lines.some(line => line.search(/\S/) > 0); // Vérifier s'il y a des indentations
 
         // Écrire le fichier converti pour vérifier la structure nettoyée
         const convertedFilePath = path.join(path.dirname(filePath), 'structure_converted_with_spaces.txt');
         fs.writeFileSync(convertedFilePath, lines.join('\n'));
 
-        // Demander à l'utilisateur de choisir le dossier où le dossier racine sera créé
+        // Demander à l'utilisateur de choisir le dossier cible où le dossier racine sera créé
         const folderUri = await vscode.window.showOpenDialog({
             canSelectFiles: false,
             canSelectFolders: true,
@@ -62,8 +91,8 @@ export function activate(context: vscode.ExtensionContext) {
             return;
         }
 
-        // Si aucun fichier n'est à la même indentation que la racine, traiter comme parent unique
-        const rootFolder = path.join(folderUri[0].fsPath, rootFolderName);
+        // Utiliser uniquement le chemin choisi par l'utilisateur
+        const rootFolder = folderUri[0].fsPath; // Utilisez uniquement le chemin du dossier cible sélectionné
 
         // Créer le dossier racine s'il n'existe pas encore
         if (!fs.existsSync(rootFolder)) {
@@ -86,28 +115,28 @@ export function activate(context: vscode.ExtensionContext) {
             // Calculer l'indentation actuelle
             const currentIndentation = line.search(/\S/);
 
-            // Si l'indentation est inférieure ou égale à la précédente, ajuster la pile
-            while (currentIndentation <= previousIndentation && stack.length > 1) {
+            // Si l'indentation est inférieure à la précédente, ajuster la pile
+            if (currentIndentation < previousIndentation && stack.length > 1) {
                 stack.pop(); // Remonter dans la hiérarchie
-                previousIndentation--; // Ajuster l'indentation
             }
 
             // Construire le chemin complet pour le dossier ou fichier
             const fullPath = path.join(stack[stack.length - 1], trimmedLine);
 
-            if (!trimmedLine.includes('.')) {
-                // C'est un dossier
-                if (!fs.existsSync(fullPath)) {
-                    fs.mkdirSync(fullPath, { recursive: true });
-                }
-                stack.push(fullPath); // Ajouter ce dossier à la pile
-            } else {
+            // Vérifier si c'est un fichier ou un dossier selon les nouvelles règles
+            if (isFile(trimmedLine)) {
                 // C'est un fichier
                 const dir = path.dirname(fullPath);
                 if (!fs.existsSync(dir)) {
                     fs.mkdirSync(dir, { recursive: true });
                 }
                 fs.writeFileSync(fullPath, ''); // Créer un fichier vide
+            } else {
+                // C'est un dossier
+                if (!fs.existsSync(fullPath)) {
+                    fs.mkdirSync(fullPath, { recursive: true });
+                }
+                stack.push(fullPath); // Ajouter ce dossier à la pile
             }
 
             // Mettre à jour l'indentation précédente
@@ -117,7 +146,7 @@ export function activate(context: vscode.ExtensionContext) {
             await wait(100); // Attendre 100ms avant de continuer (facultatif)
         }
 
-        vscode.window.showInformationMessage(`Structure de fichier créée avec succès dans ${rootFolderName} !`);
+        vscode.window.showInformationMessage(`Structure de fichier créée avec succès dans ${rootFolder} !`);
     });
 
     context.subscriptions.push(disposable);
