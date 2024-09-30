@@ -1,0 +1,22 @@
+c:/Users/User/Treecraft/
+  ├─ .vscode/
+  │  ├─ extensions.json
+  │  ├─ launch.json
+  │  ├─ settings.json
+  │  └─ tasks.json
+  ├─]node_modules/ (ignored)
+  ├─]out/ (ignored)
+  ├─ src/
+  │  ├─ test/
+  │  │  └─ extension.test.ts
+  │  └─ extension.ts
+  ├─ .gitignore
+  ├─ .vscode-test.mjs
+  ├─ .vscodeignore
+  ├─ CHANGELOG.md
+  ├─ eslint.config.mjs
+  ├─ package-lock.json
+  ├─ package.json
+  ├─ README.md
+  ├─ tsconfig.json
+  └─ vsc-extension-quickstart.md

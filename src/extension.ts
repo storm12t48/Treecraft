@@ -24,8 +24,8 @@ function isFile(line: string): boolean {
     // Liste des fichiers spécifiques sans extension à considérer comme des fichiers
     const specialFiles = ['Dockerfile', 'Makefile', 'LICENSE', 'README', 'Gemfile', 'Capfile', 'Procfile', 'Rakefile', 'Vagrantfile'];
 
-    // Si le nom correspond à un fichier sans extension spécifique, c'est un fichier
-    if (specialFiles.includes(trimmedLine)) {
+    // Si le nom est "Dockerfile", c'est toujours un fichier
+    if (trimmedLine === 'Dockerfile') {
         return true;
     }
 
@@ -74,7 +74,7 @@ export function activate(context: vscode.ExtensionContext) {
 
         // Vérifier le premier élément sans indentation (racine si aucun autre élément au même niveau)
         const rootFolderName = lines[0].trim(); // Assurez-vous que c'est uniquement un nom de dossier
-        vscode.window.showInformationMessage(`Nom du dossier racine : ${rootFolderName}`); // Debug: Afficher le nom du dossier racine
+        //vscode.window.showInformationMessage(`Nom du dossier racine : ${rootFolderName}`); // Debug: Afficher le nom du dossier racine
         lines.shift(); // Supprimer le dossier racine de la liste pour traiter le reste
 
         // Écrire le fichier converti pour vérifier la structure nettoyée
