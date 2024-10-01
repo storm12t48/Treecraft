@@ -2,8 +2,8 @@
   "name": "treecraft",
   "displayName": "TreeCraft",
   "description": "Generate nested folders and files based on a simple text input.",
-  "version": "1.0.0",
-  "publisher": "Treecraft",  
+  "version": "1.1.0",
+  "publisher": "Treecraft",
   "engines": {
     "vscode": "^1.93.0"
   },
