@@ -57,7 +57,7 @@ MyMicroserviceApp
     Program.cs
 ```
 
-### Output
+### Another version of the input 
 
 ```
 MyMicroserviceApp
